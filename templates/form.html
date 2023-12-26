@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Examination Form</title>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Examination Form</h2>
+        <form method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="document">Document for OCR:</label>
+                <input type="file" class="form-control-file" name="document" required>
+            </div>
+            <div class="form-group">
+                <label for="captcha">CAPTCHA:</label><br>
+                <img src="{{ url_for('static', filename=captcha_path.split('/')[-1]) }}" alt="CAPTCHA" id="captcha_image" class="mb-3">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="refreshCaptcha()">Refresh CAPTCHA</button>
+                <input type="text" class="form-control" name="captcha" required>
+                <input type="hidden" name="original_captcha" id="original_captcha" value="{{ captcha_text }}">
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="submissionModal" tabindex="-1" role="dialog" aria-labelledby="submissionModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="submissionModalLabel">Submission Status</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    {{ message }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+
+    <script>
+        function refreshCaptcha() {
+            // Vanilla JS AJAX request to refresh the CAPTCHA
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    // Parse the JSON response
+                    var response = JSON.parse(this.responseText);
+                    // Update the CAPTCHA image and the hidden input with new values
+                    document.getElementById('captcha_image').src = response.captcha_path;
+                    document.getElementById('original_captcha').value = response.captcha_text;
+                }
+            };
+            xhr.open("GET", "/refresh_captcha", true);
+            xhr.send();
+        }
+
+        window.onload = function(){
+            // Show the modal when there's a message (form has been submitted)
+            {% if message %}
+            var modal = new bootstrap.Modal(document.getElementById('submissionModal'));
+            modal.show();
+
+            // Hide the modal after 4 seconds
+            setTimeout(function(){
+                modal.hide();
+            }, 4000);
+            {% endif %}
+        };
+    </script>
+</body>
+</html>
