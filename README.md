@@ -1,7 +1,5 @@
 
-Below is the provided text converted into an aesthetic and structured Markdown format for a README file, complete with emojis for a friendly touch.
 
-```markdown
 # CaptaScan : OCR and CAPTCHA Examination Form 📝
 
 ## Introduction 🌟
